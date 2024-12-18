@@ -5,8 +5,6 @@ import br.com.alura.adopet.api.model.Adocao;
 import br.com.alura.adopet.api.model.StatusAdocao;
 import br.com.alura.adopet.api.repository.AdocaoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -20,7 +18,7 @@ public class AdocaoService {
     private AdocaoRepository repository;
 
     @Autowired
-    private JavaMailSender emailSender;
+    private EmailService emailService;
 
     public void solicitar(Adocao adocao){
         if (adocao.getPet().getAdotado() == true) {
@@ -51,69 +49,63 @@ public class AdocaoService {
         adocao.setStatus(StatusAdocao.AGUARDANDO_AVALIACAO);
         repository.save(adocao);
 
-        SimpleMailMessage email = new SimpleMailMessage();
-        email.setFrom("adopet@email.com.br");
-        email.setTo(adocao.getPet().getAbrigo().getEmail());
-        email.setSubject("Solicitação de adoção");
-        email.setText("Olá " +adocao.getPet().getAbrigo().getNome() +"!\n\nUma solicitação de adoção foi registrada hoje para o pet: " +adocao.getPet().getNome() +". \nFavor avaliar para aprovação ou reprovação.");
-        email.setText("""
-                Olá %s!
-                
-                Uma solicitação de adoção foi registrada hoje para o pet: %s.
-                Favor avaliar para aprovação ou reprovação.
-                """.formatted(
-                    adocao.getPet().getAbrigo().getNome(),
-                    adocao.getPet().getNome()
-                )
-        );
-        emailSender.send(email);
+        var toEmail = adocao.getPet().getAbrigo().getEmail();
+        emailService.encaminhaEmail(toEmail, "Solicitação de adoção", getTextMessageRegistroAdocao(adocao));
     }
 
     public void aprovar(Adocao adocao){
         adocao.setStatus(StatusAdocao.APROVADO);
         repository.save(adocao);
 
-        SimpleMailMessage email = new SimpleMailMessage();
-        email.setFrom("adopet@email.com.br");
-        email.setTo(adocao.getTutor().getEmail());
-        email.setSubject("Adoção aprovada");
-//        email.setText("Parabéns " +adocao.getTutor().getNome() +"!\n\nSua adoção do pet " +adocao.getPet().getNome() +", solicitada em " +adocao.getData().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) +", foi aprovada.\nFavor entrar em contato com o abrigo " +adocao.getPet().getAbrigo().getNome() +" para agendar a busca do seu pet.");
-        email.setText("""
-                Parabéns %s!
-                
-                Sua adoção do pet %s, solicitada em %s, foi aprovada.
-                favor entrar em contato com o abrigo %s para agendar a busca do seu pet.
-                """.formatted(
-                    adocao.getTutor().getNome(),
-                    adocao.getPet().getNome(),
-                    adocao.getData().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")),
-                    adocao.getPet().getAbrigo().getNome()
-                )
-        );
-        emailSender.send(email);
+        var toEmail = adocao.getPet().getAbrigo().getEmail();
+        emailService.encaminhaEmail(toEmail, "Adoção aprovada", getMessageAprovaAdocao(adocao));
     }
 
     public void reprovar(Adocao adocao){
         adocao.setStatus(StatusAdocao.REPROVADO);
         repository.save(adocao);
 
-        SimpleMailMessage email = new SimpleMailMessage();
-        email.setFrom("adopet@email.com.br");
-        email.setTo(adocao.getTutor().getEmail());
-        email.setSubject("Adoção reprovada");
-//        email.setText("Olá " +adocao.getTutor().getNome() +"!\n\nInfelizmente sua adoção do pet " +adocao.getPet().getNome() +", solicitada em " +adocao.getData().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) +", foi reprovada pelo abrigo " +adocao.getPet().getAbrigo().getNome() +" com a seguinte justificativa: " +adocao.getJustificativaStatus());
-        email.setText("""
+        var toEmail = adocao.getPet().getAbrigo().getEmail();
+        emailService.encaminhaEmail(toEmail, "Adoção reprovada", getMessageAdocaoReprovada(adocao));
+    }
+
+    private static String getTextMessageRegistroAdocao(Adocao adocao) {
+        return """
+                Olá %s!
+                
+                Uma solicitação de adoção foi registrada hoje para o pet: %s.
+                Favor avaliar para aprovação ou reprovação.
+                """.formatted(
+                adocao.getPet().getAbrigo().getNome(),
+                adocao.getPet().getNome()
+        );
+    }
+
+    private static String getMessageAprovaAdocao(Adocao adocao) {
+        return """
+                Parabéns %s!
+                
+                Sua adoção do pet %s, solicitada em %s, foi aprovada.
+                favor entrar em contato com o abrigo %s para agendar a busca do seu pet.
+                """.formatted(
+                adocao.getTutor().getNome(),
+                adocao.getPet().getNome(),
+                adocao.getData().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")),
+                adocao.getPet().getAbrigo().getNome()
+        );
+    }
+
+    private static String getMessageAdocaoReprovada(Adocao adocao) {
+        return """
                 Olá %s!
                 
                 Infelizmente sua adoção do pet %s, solicitada em %s, foi reprovada pelo abrigo %s com a seguinte justificativa: %s.
                 """.formatted(
-                    adocao.getTutor().getNome(),
-                    adocao.getPet().getNome(),
-                    adocao.getData().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")),
-                    adocao.getPet().getAbrigo().getNome(),
-                    adocao.getJustificativaStatus()
-                )
+                adocao.getTutor().getNome(),
+                adocao.getPet().getNome(),
+                adocao.getData().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")),
+                adocao.getPet().getAbrigo().getNome(),
+                adocao.getJustificativaStatus()
         );
-        emailSender.send(email);
     }
 }
