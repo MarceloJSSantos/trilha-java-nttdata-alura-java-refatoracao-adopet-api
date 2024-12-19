@@ -1,9 +1,14 @@
 package br.com.alura.adopet.api.service;
 
+import br.com.alura.adopet.api.dto.AprovacaoAdocaoDto;
+import br.com.alura.adopet.api.dto.ReprovacaoAdocaoDto;
+import br.com.alura.adopet.api.dto.SolicitacaoAdocaoDto;
 import br.com.alura.adopet.api.exception.ValidacaoException;
 import br.com.alura.adopet.api.model.Adocao;
 import br.com.alura.adopet.api.model.StatusAdocao;
 import br.com.alura.adopet.api.repository.AdocaoRepository;
+import br.com.alura.adopet.api.repository.PetRepository;
+import br.com.alura.adopet.api.repository.TutorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,10 +23,26 @@ public class AdocaoService {
     private AdocaoRepository repository;
 
     @Autowired
+    private PetRepository petRepository;
+
+    @Autowired
+    private TutorRepository tutorRepository;
+
+    @Autowired
     private EmailService emailService;
 
-    public void solicitar(Adocao adocao){
-        if (adocao.getPet().getAdotado() == true) {
+    public void solicitar(SolicitacaoAdocaoDto dto){
+        var pet = petRepository.getReferenceById(dto.idPet());
+        var tutor = tutorRepository.getReferenceById(dto.idTutor());
+
+        var adocao = new Adocao();
+        adocao.setPet(pet);
+        adocao.setTutor(tutor);
+        adocao.setData(LocalDateTime.now());
+        adocao.setStatus(StatusAdocao.AGUARDANDO_AVALIACAO);
+        adocao.setMotivo(dto.motivo());
+
+        if (adocao.getPet().getAdotado()) {
             throw new ValidacaoException("Pet já foi adotado!");
         } else {
             List<Adocao> adocoes = repository.findAll();
@@ -45,25 +66,25 @@ public class AdocaoService {
                 }
             }
         }
-        adocao.setData(LocalDateTime.now());
-        adocao.setStatus(StatusAdocao.AGUARDANDO_AVALIACAO);
+
         repository.save(adocao);
 
         var toEmail = adocao.getPet().getAbrigo().getEmail();
         emailService.encaminhaEmail(toEmail, "Solicitação de adoção", getTextMessageRegistroAdocao(adocao));
     }
 
-    public void aprovar(Adocao adocao){
+    public void aprovar(AprovacaoAdocaoDto dto){
+        var adocao = repository.getReferenceById(dto.idAdocao());
         adocao.setStatus(StatusAdocao.APROVADO);
-        repository.save(adocao);
 
         var toEmail = adocao.getPet().getAbrigo().getEmail();
         emailService.encaminhaEmail(toEmail, "Adoção aprovada", getMessageAprovaAdocao(adocao));
     }
 
-    public void reprovar(Adocao adocao){
+    public void reprovar(ReprovacaoAdocaoDto dto){
+        var adocao = repository.getReferenceById(dto.idAdocao());
+        adocao.setJustificativaStatus(dto.justificativaStatus());
         adocao.setStatus(StatusAdocao.REPROVADO);
-        repository.save(adocao);
 
         var toEmail = adocao.getPet().getAbrigo().getEmail();
         emailService.encaminhaEmail(toEmail, "Adoção reprovada", getMessageAdocaoReprovada(adocao));
