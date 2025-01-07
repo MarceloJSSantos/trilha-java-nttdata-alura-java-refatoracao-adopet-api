@@ -1,5 +1,6 @@
 package br.com.alura.adopet.api.service;
 
+import br.com.alura.adopet.api.businessValidation.ValidaSolicitacaoAdocao;
 import br.com.alura.adopet.api.dto.AprovacaoAdocaoDto;
 import br.com.alura.adopet.api.dto.ReprovacaoAdocaoDto;
 import br.com.alura.adopet.api.dto.SolicitacaoAdocaoDto;
@@ -31,6 +32,9 @@ public class AdocaoService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private List<ValidaSolicitacaoAdocao> validacoes;
+
     public void solicitar(SolicitacaoAdocaoDto dto){
         var pet = petRepository.getReferenceById(dto.idPet());
         var tutor = tutorRepository.getReferenceById(dto.idTutor());
@@ -42,30 +46,7 @@ public class AdocaoService {
         adocao.setStatus(StatusAdocao.AGUARDANDO_AVALIACAO);
         adocao.setMotivo(dto.motivo());
 
-        if (adocao.getPet().getAdotado()) {
-            throw new ValidacaoException("Pet já foi adotado!");
-        } else {
-            List<Adocao> adocoes = repository.findAll();
-            for (Adocao a : adocoes) {
-                if (a.getTutor() == adocao.getTutor() && a.getStatus() == StatusAdocao.AGUARDANDO_AVALIACAO) {
-                    throw new ValidacaoException("Tutor já possui outra adoção aguardando avaliação!");
-                }
-            }
-            for (Adocao a : adocoes) {
-                if (a.getPet() == adocao.getPet() && a.getStatus() == StatusAdocao.AGUARDANDO_AVALIACAO) {
-                    throw new ValidacaoException("Pet já está aguardando avaliação para ser adotado!");
-                }
-            }
-            for (Adocao a : adocoes) {
-                int contador = 0;
-                if (a.getTutor() == adocao.getTutor() && a.getStatus() == StatusAdocao.APROVADO) {
-                    contador = contador + 1;
-                }
-                if (contador == 5) {
-                    throw new ValidacaoException("Tutor chegou ao limite máximo de 5 adoções!");
-                }
-            }
-        }
+        validacoes.forEach(v -> v.valida(adocao));
 
         repository.save(adocao);
 
