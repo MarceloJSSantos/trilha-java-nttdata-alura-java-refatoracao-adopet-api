@@ -16,11 +16,10 @@ public class ValidaSePetAguardaAvaliacaoAdocao implements ValidaSolicitacaoAdoca
     private AdocaoRepository adocaoRepository;
 
     public void valida(Adocao adocao){
-        List<Adocao> adocoes = adocaoRepository.findAll();
-        for (Adocao a : adocoes) {
-            if (a.getPet() == adocao.getPet() && a.getStatus() == StatusAdocao.AGUARDANDO_AVALIACAO) {
-                throw new ValidacaoException("Pet já está aguardando avaliação para ser adotado!");
-            }
+        boolean petTemAdocaoEmAdamento = adocaoRepository.existsByPetIdAndStatus(
+                adocao.getPet().getId(), StatusAdocao.AGUARDANDO_AVALIACAO);
+        if (petTemAdocaoEmAdamento) {
+            throw new ValidacaoException("Pet já está aguardando avaliação para ser adotado!");
         }
     }
 }

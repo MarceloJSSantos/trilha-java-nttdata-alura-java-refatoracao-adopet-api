@@ -16,11 +16,10 @@ public class ValidaSeTutorAguardaAvaliacaoAdocao implements ValidaSolicitacaoAdo
     private AdocaoRepository adocaoRepository;
 
     public void valida(Adocao adocao){
-        List<Adocao> adocoes = adocaoRepository.findAll();
-        for (Adocao a : adocoes) {
-            if (a.getTutor() == adocao.getTutor() && a.getStatus() == StatusAdocao.AGUARDANDO_AVALIACAO) {
-                throw new ValidacaoException("Tutor já possui outra adoção aguardando avaliação!");
-            }
+        boolean tutorAguardaAvaliacaoAdocao = adocaoRepository.existsByTutorIdAndStatus(
+                adocao.getTutor().getId(), StatusAdocao.AGUARDANDO_AVALIACAO);
+        if (tutorAguardaAvaliacaoAdocao) {
+            throw new ValidacaoException("Tutor já possui outra adoção aguardando avaliação!");
         }
     }
 }
