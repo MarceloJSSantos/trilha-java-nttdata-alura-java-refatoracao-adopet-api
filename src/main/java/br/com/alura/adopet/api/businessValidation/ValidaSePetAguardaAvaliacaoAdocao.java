@@ -7,8 +7,6 @@ import br.com.alura.adopet.api.repository.AdocaoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Component
 public class ValidaSePetAguardaAvaliacaoAdocao implements ValidaSolicitacaoAdocao{
 
