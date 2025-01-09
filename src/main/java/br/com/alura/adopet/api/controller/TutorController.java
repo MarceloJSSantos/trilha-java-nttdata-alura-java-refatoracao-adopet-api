@@ -31,8 +31,12 @@ public class TutorController {
     @PutMapping
     @Transactional
     public ResponseEntity<String> atualizar(@RequestBody @Valid AtualizaTutorDto dto) {
-        tutorService.atualizar(dto);
-        return ResponseEntity.ok().build();
+        try {
+            tutorService.atualizar(dto);
+            return ResponseEntity.ok().build();
+        } catch (ValidacaoException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 }
