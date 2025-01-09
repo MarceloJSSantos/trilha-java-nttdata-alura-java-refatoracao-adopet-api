@@ -1,4 +1,4 @@
-package br.com.alura.adopet.api.businessValidation;
+package br.com.alura.adopet.api.businessValidation.Adocao;
 
 import br.com.alura.adopet.api.model.Adocao;
 
