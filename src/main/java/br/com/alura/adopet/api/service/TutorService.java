@@ -27,10 +27,7 @@ public class TutorService {
 
         validacoesCadastro.forEach(v -> v.valida(dto));
 
-        Tutor tutor = new Tutor();
-        tutor.setNome(dto.nome());
-        tutor.setTelefone(dto.telefone());
-        tutor.setEmail(dto.email());
+        Tutor tutor = new Tutor(dto.nome(), dto.telefone(), dto.email());
         repository.save(tutor);
     }
 
