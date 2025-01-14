@@ -5,7 +5,7 @@ import br.com.alura.adopet.api.model.Adocao;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ValidaSePetFoiAdotado implements ValidaSolicitacaoAdocao{
+public class ValidaSePetFoiAdotado implements ValidacaoSolicitacaoAdocao {
 
     public void valida(Adocao adocao){
         if (adocao.getPet().getAdotado()) {

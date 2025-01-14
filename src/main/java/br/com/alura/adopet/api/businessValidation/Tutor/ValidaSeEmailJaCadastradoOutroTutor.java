@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ValidaSeEmailJaCadastradoOutroTutor implements ValidaCadastroTutor, ValidaAtualizaTutor {
+public class ValidaSeEmailJaCadastradoOutroTutor implements ValidacaoCadastroTutor, ValidacaoAtualizaTutor {
 
     @Autowired
     private TutorRepository repository;

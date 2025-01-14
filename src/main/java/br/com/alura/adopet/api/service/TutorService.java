@@ -1,7 +1,7 @@
 package br.com.alura.adopet.api.service;
 
-import br.com.alura.adopet.api.businessValidation.Tutor.ValidaAtualizaTutor;
-import br.com.alura.adopet.api.businessValidation.Tutor.ValidaCadastroTutor;
+import br.com.alura.adopet.api.businessValidation.Tutor.ValidacaoAtualizaTutor;
+import br.com.alura.adopet.api.businessValidation.Tutor.ValidacaoCadastroTutor;
 import br.com.alura.adopet.api.dto.Tutor.AtualizaTutorDto;
 import br.com.alura.adopet.api.dto.Tutor.CadastroTutorDto;
 import br.com.alura.adopet.api.model.Tutor;
@@ -18,10 +18,10 @@ public class TutorService {
     private TutorRepository repository;
 
     @Autowired
-    private List<ValidaCadastroTutor> validacoesCadastro;
+    private List<ValidacaoCadastroTutor> validacoesCadastro;
 
     @Autowired
-    private List<ValidaAtualizaTutor> validacoesAtualizacao;
+    private List<ValidacaoAtualizaTutor> validacoesAtualizacao;
 
     public void cadastrar(CadastroTutorDto dto){
 

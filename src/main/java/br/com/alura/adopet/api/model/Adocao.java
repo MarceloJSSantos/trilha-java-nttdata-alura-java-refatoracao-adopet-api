@@ -98,6 +98,7 @@ public class Adocao {
 
     public void registraStatusAprovado() {
         this.status = StatusAdocao.APROVADO;
+        this.pet.setAdotado(true);
     }
 
     public void registraStatusReprovado(String justificativaStatus) {

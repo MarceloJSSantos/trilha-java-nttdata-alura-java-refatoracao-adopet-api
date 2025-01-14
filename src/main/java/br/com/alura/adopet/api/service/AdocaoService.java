@@ -1,6 +1,6 @@
 package br.com.alura.adopet.api.service;
 
-import br.com.alura.adopet.api.businessValidation.Adocao.ValidaSolicitacaoAdocao;
+import br.com.alura.adopet.api.businessValidation.Adocao.ValidacaoSolicitacaoAdocao;
 import br.com.alura.adopet.api.dto.Adocao.AprovacaoAdocaoDto;
 import br.com.alura.adopet.api.dto.Adocao.ReprovacaoAdocaoDto;
 import br.com.alura.adopet.api.dto.Adocao.SolicitacaoAdocaoDto;
@@ -30,7 +30,7 @@ public class AdocaoService {
     private EmailService emailService;
 
     @Autowired
-    private List<ValidaSolicitacaoAdocao> validacoes;
+    private List<ValidacaoSolicitacaoAdocao> validacoes;
 
     public void solicitar(SolicitacaoAdocaoDto dto){
         var pet = petRepository.getReferenceById(dto.idPet());
